@@ -118,11 +118,11 @@ kubectl get pods -n starrocks-prod
 
 ## 📊 환경별 특징
 
-| 환경 | Replica | CPU | Memory | 자동 동기화 | Namespace |
+| 환경 | Replica | CPU | Memory | 동기화 정책 | Namespace |
 |------|---------|-----|--------|----------|-----------|
-| **Dev** | 1 | 250m/500m | 256Mi/512Mi | ✅ | `starrocks-dev` |
-| **Staging** | 2 | 500m/1000m | 512Mi/1Gi | ✅ | `starrocks-staging` |
-| **Prod** | 3 | 1000m/2000m | 1Gi/2Gi | ❌ | `starrocks-prod` |
+| **Dev** | 1 | 250m/500m | 256Mi/512Mi | 수동 | `starrocks-dev` |
+| **Staging** | 2 | 500m/1000m | 512Mi/1Gi | 수동 | `starrocks-staging` |
+| **Prod** | 3 | 1000m/2000m | 1Gi/2Gi | 수동 | `starrocks-prod` |
 
 ## 🔧 주요 파일 설명
 

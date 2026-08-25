@@ -32,10 +32,10 @@ argocd/
 **특징:**
 - **ApplicationSet**을 사용한 동적 Application 생성
 - **List Generator**로 dev, staging, prod 환경 정의
-- 각 환경별로 고유한 설정 (namespace, autoSync 등)
+- 각 환경별로 고유한 설정 (namespace, syncPolicy 등)
 - 템플릿 기반으로 3개의 Application 자동 생성
-- Dev/Staging: 자동 동기화 활성화
-- Prod: 수동 동기화 (안전성)
+- **모든 환경**: 수동 동기화 (명시적 배포 승인 필요)
+- 안전성과 제어 우선
 - Kustomize 없이 직접 배포 가능
 
 ### 3. 배포 스크립트

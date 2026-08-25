@@ -79,9 +79,10 @@ kubectl get applications -n argocd
 
 # 출력 예시:
 # NAME                                 SYNC STATUS   HEALTH STATUS
-# kube-starrocks-operator-dev          Synced        Healthy
-# kube-starrocks-operator-staging      Synced        Healthy
+# kube-starrocks-operator-dev          OutOfSync     Healthy
+# kube-starrocks-operator-staging      OutOfSync     Healthy
 # kube-starrocks-operator-prod         OutOfSync     Healthy
+# (수동 동기화 설정이므로 OutOfSync가 정상)
 ```
 
 ## 🚀 5단계: Kustomize로 각 환경 배포 (1분)

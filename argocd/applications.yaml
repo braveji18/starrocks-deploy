@@ -14,16 +14,16 @@ spec:
           # Development Environment
           - name: dev
             namespace: starrocks-dev
-            autoSync: "true"
-            pruneEnabled: "true"
-            selfHealEnabled: "true"
+            autoSync: "false"
+            pruneEnabled: "false"
+            selfHealEnabled: "false"
 
           # Staging Environment
           - name: staging
             namespace: starrocks-staging
-            autoSync: "true"
-            pruneEnabled: "true"
-            selfHealEnabled: "true"
+            autoSync: "false"
+            pruneEnabled: "false"
+            selfHealEnabled: "false"
 
           # Production Environment
           - name: prod

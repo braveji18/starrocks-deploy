@@ -57,10 +57,7 @@
 
 #### Git 저장소 설정
 - [ ] 모든 변경사항이 Git에 커밋됨
-- [ ] `argocd/overlays/staging/application.yaml`의 repoURL 확인
-  ```yaml
-  repoURL: https://your-git-repo.com/starrocks-deploy.git
-  ```
+- [ ] `argocd/applications.yaml`의 staging 설정 확인
 
 #### ArgoCD 설정
 - [ ] Git 저장소를 ArgoCD에 추가
@@ -69,9 +66,9 @@
 - [ ] ApplicationSet Controller 활성화 확인 (ArgoCD 1.12+)
 
 #### 배포 실행
-- [ ] `./bin/deploy.sh staging` 실행
+- [ ] Application 배포: `kubectl apply -f argocd/applications.yaml`
+- [ ] Staging Application 동기화: `argocd app sync kube-starrocks-operator-staging`
 - [ ] Pod이 다른 노드에 분산되는지 확인 (Anti-Affinity)
-- [ ] Webhook 활성화 확인
 
 #### 성능/통합 테스트
 - [ ] 리소스 모니터링 (`kubectl top pods`)
