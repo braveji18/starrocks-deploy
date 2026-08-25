@@ -1,0 +1,259 @@
+---
+# StarRocks 샘플 클러스터 - 개발 환경용
+#
+# 배포 방법:
+#   kubectl apply -f docs/sample-cluster.yaml -n starrocks-dev
+
+apiVersion: starrocks.com/v1
+kind: StarRocksCluster
+metadata:
+  name: starrocks-sample
+  namespace: starrocks-dev
+  labels:
+    app: starrocks
+spec:
+  # 이미지 설정
+  imageTag: v2.7.0
+  imagePullPolicy: IfNotPresent
+
+  # Frontend (쿼리 엔진)
+  feSpec:
+    replicas: 1
+    image: starrocks/fe
+    resources:
+      limits:
+        cpu: 4
+        memory: 8Gi
+      requests:
+        cpu: 2
+        memory: 4Gi
+
+    # Storage 설정
+    storageSpec:
+      storageClassName: standard
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+
+  # Backend (스토리지 엔진)
+  beSpec:
+    replicas: 3
+    image: starrocks/be
+    resources:
+      limits:
+        cpu: 8
+        memory: 16Gi
+      requests:
+        cpu: 4
+        memory: 8Gi
+
+    # Storage 설정
+    storageSpec:
+      storageClassName: standard
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Gi
+
+  # CN (쿼리 캐시, 선택사항)
+  # cnSpec:
+  #   replicas: 1
+  #   image: starrocks/cn
+  #   resources:
+  #     limits:
+  #       cpu: 4
+  #       memory: 8Gi
+  #     requests:
+  #       cpu: 2
+  #       memory: 4Gi
+
+  # 서비스 설정
+  feService:
+    type: ClusterIP
+    port: 9030
+
+  queryService:
+    type: ClusterIP
+    port: 9010
+
+  # 로그 레벨
+  logLevel: INFO
+
+---
+# StarRocks 클러스터 - 스테이징 환경용
+apiVersion: starrocks.com/v1
+kind: StarRocksCluster
+metadata:
+  name: starrocks-staging
+  namespace: starrocks-staging
+  labels:
+    app: starrocks
+    environment: staging
+spec:
+  imageTag: v2.7.0
+  imagePullPolicy: IfNotPresent
+
+  feSpec:
+    replicas: 3  # 고가용성
+    image: starrocks/fe
+    resources:
+      limits:
+        cpu: 8
+        memory: 16Gi
+      requests:
+        cpu: 4
+        memory: 8Gi
+
+    storageSpec:
+      storageClassName: standard
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+
+  beSpec:
+    replicas: 3
+    image: starrocks/be
+    resources:
+      limits:
+        cpu: 16
+        memory: 32Gi
+      requests:
+        cpu: 8
+        memory: 16Gi
+
+    storageSpec:
+      storageClassName: standard
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 200Gi
+
+  feService:
+    type: ClusterIP
+    port: 9030
+
+  queryService:
+    type: ClusterIP
+    port: 9010
+
+  logLevel: INFO
+
+  # Pod Anti-Affinity
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - starrocks
+            topologyKey: kubernetes.io/hostname
+
+---
+# StarRocks 클러스터 - 프로덕션 환경용
+apiVersion: starrocks.com/v1
+kind: StarRocksCluster
+metadata:
+  name: starrocks-prod
+  namespace: starrocks-prod
+  labels:
+    app: starrocks
+    environment: production
+    backup-enabled: "true"
+spec:
+  imageTag: v2.7.0
+  imagePullPolicy: IfNotPresent
+
+  feSpec:
+    replicas: 5  # 최고 가용성
+    image: starrocks/fe
+    resources:
+      limits:
+        cpu: 16
+        memory: 32Gi
+      requests:
+        cpu: 8
+        memory: 16Gi
+
+    storageSpec:
+      storageClassName: fast-ssd  # 프로덕션용 고속 스토리지
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
+
+  beSpec:
+    replicas: 5
+    image: starrocks/be
+    resources:
+      limits:
+        cpu: 32
+        memory: 64Gi
+      requests:
+        cpu: 16
+        memory: 32Gi
+
+    storageSpec:
+      storageClassName: fast-ssd
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 500Gi
+
+  # CN 노드 (쿼리 캐시)
+  cnSpec:
+    replicas: 3
+    image: starrocks/cn
+    resources:
+      limits:
+        cpu: 8
+        memory: 16Gi
+      requests:
+        cpu: 4
+        memory: 8Gi
+
+  feService:
+    type: LoadBalancer  # 프로덕션에서는 LoadBalancer 권장
+    port: 9030
+
+  queryService:
+    type: LoadBalancer
+    port: 9010
+
+  logLevel: WARN
+
+  # Pod Anti-Affinity (필수)
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - starrocks
+          topologyKey: kubernetes.io/hostname
+
+  # Tolerations
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: database
+      effect: NoSchedule
+
+  # 백업 설정 (선택사항)
+  # backup:
+  #   enabled: true
+  #   schedule: "0 2 * * *"  # 매일 2시 UTC
+  #   storageLocation: s3://starrocks-backup/

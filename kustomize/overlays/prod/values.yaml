@@ -1,0 +1,69 @@
+# 프로덕션 환경 - StarRocks Operator 설정
+
+replicaCount: 3
+
+image:
+  tag: v1.9.0
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 1000m
+    memory: 1Gi
+
+logLevel: warn
+debug: false
+
+webhooks:
+  enabled: true
+  port: 9443
+  failurePolicy: Fail
+
+metrics:
+  enabled: true
+  interval: 300s
+
+# 고가용성 및 성능 최적화
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - starrocks
+        topologyKey: kubernetes.io/hostname
+
+# Tolerations (노드 라벨 지정)
+tolerations:
+  - key: workload
+    operator: Equal
+    value: critical
+    effect: NoSchedule
+
+# 서비스 계정 설정
+serviceAccount:
+  create: true
+  annotations:
+    iam.gke.io/gcp-service-account: starrocks-prod@project.iam.gserviceaccount.com
+
+# 네트워크 정책
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Backup 설정
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # 매일 2시 UTC

@@ -1,0 +1,70 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: starrocks-operator
+  namespace: argocd
+  labels:
+    app: starrocks
+    managed-by: argocd
+spec:
+  # List Generator: 각 환경별로 Application 생성
+  generators:
+    - list:
+        elements:
+          # Development Environment
+          - name: dev
+            namespace: starrocks-dev
+            autoSync: "true"
+            pruneEnabled: "true"
+            selfHealEnabled: "true"
+
+          # Staging Environment
+          - name: staging
+            namespace: starrocks-staging
+            autoSync: "true"
+            pruneEnabled: "true"
+            selfHealEnabled: "true"
+
+          # Production Environment
+          - name: prod
+            namespace: starrocks-prod
+            autoSync: "false"
+            pruneEnabled: "false"
+            selfHealEnabled: "false"
+
+  # 생성될 Application의 템플릿
+  template:
+    metadata:
+      name: kube-starrocks-operator-{{ name }}
+      labels:
+        environment: {{ name }}
+        app: starrocks
+        managed-by: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+
+    spec:
+      project: default
+
+      source:
+        repoURL: https://your-git-repo.com/starrocks-deploy.git
+        path: kustomize/overlays/{{ name }}
+        plugin:
+          name: kustomize
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: {{ namespace }}
+
+      syncPolicy:
+        automated:
+          prune: {{ pruneEnabled }}
+          selfHeal: {{ selfHealEnabled }}
+        syncOptions:
+          - CreateNamespace=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

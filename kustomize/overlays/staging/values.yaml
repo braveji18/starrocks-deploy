@@ -1,0 +1,39 @@
+# 스테이징 환경 - StarRocks Operator 설정
+
+replicaCount: 2
+
+image:
+  tag: v1.9.0
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+logLevel: info
+debug: false
+
+webhooks:
+  enabled: true
+  port: 9443
+
+metrics:
+  enabled: true
+  interval: 60s
+
+# 고가용성 설정
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - starrocks
+          topologyKey: kubernetes.io/hostname

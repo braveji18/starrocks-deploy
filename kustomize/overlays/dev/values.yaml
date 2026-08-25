@@ -1,0 +1,29 @@
+# 개발 환경 - StarRocks Operator 설정
+
+replicaCount: 1
+
+image:
+  tag: v1.9.0  # 개발 버전
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# 로깅 설정
+logLevel: debug
+
+# 디버그 모드
+debug: true
+
+# Webhooks (개발 환경에서는 선택사항)
+webhooks:
+  enabled: false
+
+# 메트릭 수집
+metrics:
+  enabled: true
+  interval: 30s
